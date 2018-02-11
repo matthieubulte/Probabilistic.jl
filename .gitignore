@@ -1,3 +1,8 @@
 *.jl.cov
 *.jl.*.cov
 *.jl.mem
+*~
+\#*\#
+.\#*
+examples/originalnotebook.ipynb
+.ipynb_checkpoints

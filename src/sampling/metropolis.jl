@@ -6,22 +6,31 @@ struct Metropolis
     Metropolis(steps::Int) = new(steps, genericperturb)
 end
 
+# TODO: this is bad
 function genericperturb(node::Node)
-    throw("Not implemented: genericperturb")
+    if node.distribution isa Normal
+        node.value + std(node.distribution) * randn()
+    elseif node.distribution isa Beta
+        node.value + .1 * randn()
+    elseif node.distribution isa BiMix
+        node.value + randn()
+    else
+        rand(node.distribution)
+    end
 end
 
 function run(config::Metropolis, model::Model)
     runmodel = compile(model)
 
     observations = Dict{Symbol, Array}()
-    foreach(var -> observation[var] = Array{Any}(config.steps), model.observed)
+    foreach(var -> observations[var] = Array{Any}(config.steps), model.observed)
 
-    trace = runmodel(nothing, observations, 1)
+    trace = Base.invokelatest(runmodel, nothing, observations, 1)
     lhood = loglikelihood(trace)
 
     for i = 2:config.steps
         proposal = propose(trace, config.perturb)
-        proposal = runmodel(proposal, observations, i)
+        proposal = Base.invokelatest(runmodel, proposal, observations, i)
         newlhood = loglikelihood(proposal)
 
         if rand() <= exp(newlhood - lhood)
@@ -29,7 +38,7 @@ function run(config::Metropolis, model::Model)
             lhood = newlhood
         else
             # overwrite the observations since proposal was rejected
-            foreach(var -> observation[var][i] = observation[var][i-1], model.observed)
+            foreach(var -> observations[var][i] = observations[var][i-1], model.observed)
         end
     end
 

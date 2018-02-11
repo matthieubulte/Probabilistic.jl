@@ -1,8 +1,8 @@
 
 Leaf = Void
-mutable struct Node{D<:Distribution}
+mutable struct Node
     name::Symbol
-    distribution::D
+    distribution # TODO find a way to type this
     value::Any
     loglikelihood::Float64
     israndom::Bool
@@ -11,7 +11,7 @@ end
 Trace = Union{Leaf, Node}
 
 
-function extend!{D<:Distribution}(previous::Trace, name::Symbol, distribution::D, value, israndom::Bool)
+function extend!(previous::Trace, name::Symbol, distribution, value, israndom::Bool)
     node = Node(name, distribution, value, logpdf(distribution, value), israndom, nothing)
     if !(previous isa Leaf)
         previous.next = node

@@ -5,9 +5,10 @@ import Base: copy
 using Distributions
 using MacroTools
 using MacroTools: postwalk, prettify
-
+using PyPlot
 
 include("model.jl")
+include("plot.jl")
 
 include("compiler/utils.jl")
 include("compiler/compiler.jl")
@@ -19,6 +20,6 @@ include("sampling/trace.jl")
 include("sampling/metropolis.jl")
 include("sampling/sample.jl")
 
-export @model, Model, condition, observe, sample, Metropolis, BiMix, Multi
+export @model, Model, condition, observe, sample, Metropolis, BiMix, Multi, plotresult
 
 end

@@ -1,5 +1,5 @@
 function compile(model::Model)
-    observe = mapcatexpr(s -> :(observations[$(quot(s))][current] = $s), model.observed)
+    observe = mapcatexpr(s -> :(observations[$(quot(s))][observationid] = $s), model.observed)
     declareobserved = mapcatexpr(var -> :($var = nothing), model.observed)
     declareconds = mapcatexpr(cond -> :($(condname(cond.first)) = $(cond.second)), model.conditionings)
 
@@ -15,7 +15,7 @@ function compile(model::Model)
     end
 
     r = quote
-        function $(gensym())(traceroot, observations, current)
+        function $(gensym())(traceroot::Trace, observations::Dict{Symbol,Array}, observationid::Int)
             $(model.params) = $(model.arguments)
             $declareconds
             $declareobserved
@@ -29,5 +29,5 @@ function compile(model::Model)
             return traceroot
         end
     end
-    return prettify(r)
+    return eval(r)
 end

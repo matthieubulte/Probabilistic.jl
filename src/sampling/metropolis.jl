@@ -35,7 +35,8 @@ function run(config::Metropolis, model::Model)
         proposal = Base.invokelatest(runmodel, proposal, observations, i)
         newlhood = loglikelihood(proposal)
 
-        if rand() <= exp(newlhood - lhood)
+        # NOTE: this is assuming that the proposal kernel for each var is symmetrical, bad
+        if log(rand()) <= newlhood - lhood
             trace = proposal
             lhood = newlhood
         else

@@ -10,6 +10,19 @@ mutable struct Node
 end
 Trace = Union{Leaf, Node}
 
+function copyupto(trace::Trace, upto::Node)
+    if trace isa Leaf
+        trace,trace
+    elseif trace == upto
+        newupto = Node(upto.name, upto.distribution, upto.value, upto.loglikelihood, upto.israndom, nothing)
+        newupto,newupto
+    else
+        head = Node(trace.name, trace.distribution, trace.value, trace.loglikelihood, trace.israndom, nothing)
+        rest,upto = copyupto(trace.next,upto)
+        head.next = rest
+        head,upto
+    end
+end
 
 function extend!(previous::Trace, name::Symbol, distribution, value, israndom::Bool)
     node = Node(name, distribution, value, logpdf(distribution, value), israndom, nothing)
@@ -19,15 +32,12 @@ function extend!(previous::Trace, name::Symbol, distribution, value, israndom::B
     node
 end
 
-function len(node::Trace)
-    node isa Leaf ? 0 : 1+len(node.next)
+function getrandnode(n::Int, node::Trace)
+    (n<=1 || node isa Leaf) ? node : getrandnode(n-(node.israndom ? 1 : 0), node.next)
 end
 
-function toarray(trace::Trace)
-    length = len(trace)
-    arr = Array{Node}(length); arr[1] = trace
-    foreach(i -> arr[i] = arr[i-1].next, 2:length)
-    arr
+function countrandom(node::Trace)
+    node isa Leaf ? 0 : (node.israndom ? 1 : 0) + countrandom(node.next)
 end
 
 function Distributions.loglikelihood(trace::Trace)
@@ -41,13 +51,11 @@ function Distributions.loglikelihood(trace::Trace)
 end
 
 function propose(trace::Trace, perturb)
-    proposal = deepcopy(trace) # TODO: implement copy in trace to avoid extra copying
-                               # NOTE: actually, only two traces are needed in memory at each point of time
+    nrandoms = countrandom(trace)
+    nodeid = rand(1:nrandoms)
+    node = getrandnode(nodeid, trace)
 
-    nodes = shuffle(toarray(proposal))
-
-    perturb_idx = findfirst(n -> n.israndom, nodes)
-    node = nodes[perturb_idx]
+    proposal,node = copyupto(trace,node)
 
     node.value = perturb(node)
     node.loglikelihood = logpdf(node.distribution, node.value)

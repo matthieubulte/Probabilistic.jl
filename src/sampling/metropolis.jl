@@ -23,10 +23,12 @@ function run(config::Metropolis, model::Model)
     runmodel = compile(model)
 
     observations = Dict{Symbol, Array}()
+    loglikelihoods = Array{Float64}(config.steps)
     foreach(var -> observations[var] = Array{Any}(config.steps), model.observed)
 
     trace = Base.invokelatest(runmodel, nothing, observations, 1)
     lhood = loglikelihood(trace)
+    loglikelihoods[1] = lhood
 
     for i = 2:config.steps
         proposal = propose(trace, config.perturb)
@@ -40,7 +42,8 @@ function run(config::Metropolis, model::Model)
             # overwrite the observations since proposal was rejected
             foreach(var -> observations[var][i] = observations[var][i-1], model.observed)
         end
+        loglikelihoods[i] = lhood
     end
 
-    observations
+    observations, loglikelihoods
 end

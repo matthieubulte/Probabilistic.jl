@@ -42,7 +42,7 @@ end
 
 function propose(trace::Trace, perturb)
     proposal = deepcopy(trace) # TODO: implement copy in trace to avoid extra copying
-                               # NOTE: traces could be implemented as tries
+                               # NOTE: actually, only two traces are needed in memory at each point of time
 
     nodes = shuffle(toarray(proposal))
 

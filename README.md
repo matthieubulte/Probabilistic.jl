@@ -1,14 +1,19 @@
 
-probabilistic.jl is a small project attempting to embed a simple probabilistic modeling language in Julia.
+# Probabilistic.jl
 
-Models are written in quoted expressions using an extended version of Julia's syntax, and a the library then compiles these models to Julia functions intrumented to be able to run, condition and sample from these models.
+Probabilistic.jl is an attempt to provide lightweight and easy to use probabilistic programming in Julia.
 
-Example:
-
-```
-blah
+```julia
+# TODO: describe the library. Until then, see examples/
 ```
 
+### About
 
+I got interested in probabilistic programming languages after watching a talk from Dan Roy [1] and decided to give it a try after reading a gist from Char Scherrer, implementing a probabilistic modeling DSLs in Julia through program transformation [2].
 
-NOTE: this is a toy project, and doesn't have the ambition to be more than that.
+The goal of this project is for me is twofold:
+ - learn about the implementation of probabilistic programming languages
+ - have an interesting use case of SMC algorithms, which is the subject of my bachelor thesis.
+
+[1] https://simons.berkeley.edu/talks/daniel-roy-10-06-2016
+[2] https://github.com/cscherrer/Soss.jl
